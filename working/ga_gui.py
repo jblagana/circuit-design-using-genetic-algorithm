@@ -8,7 +8,7 @@ from os import path
 
 sg.theme('DarkBlue14')
 
-layout= [   [sg.Text('It\'s me, hi.')],
+layout= [   [sg.Text('Hey it\'s me')],
             [sg.Text('.asc file path'), sg.FileBrowse()],
             [sg.Text('Resistor name(s): '), sg.InputText()],
             [sg.Text('Capacitor name(s): '), sg.InputText()],
@@ -45,20 +45,20 @@ while True:
     event, values = window.read()
     if event == sg.WIN_CLOSED or event == 'Exit':
         break
-    print(values)
+
     resistorInput=values[resistKey]
     capacitorInput = values[capKey]
     inductorInput = values[inductorKey]
     ascPath=values[ascKey]
-    outputs=values[outputKey]
-    output_values=values[valueKey]
+    output=values[outputKey]
+    value=values[valueKey]
     gen=values[genKey]
     solNum=values[solNumKey]
 
     if not pattern.match(resistorInput) and not resistorInput=="":
         sg.popup("Invalid resistors")
         continue
-    elif resistorInput == "":
+    elif resistorInput == "NA":
         resistors = []
     elif not resistorInput=="":
         resistors=parseInput(resistorInput)
@@ -66,7 +66,7 @@ while True:
     if not pattern.match(capacitorInput) and not capacitorInput=="":
         sg.popup("Invalid capacitors")
         continue
-    elif capacitorInput == "":
+    elif capacitorInput == "NA":
         capacitors = []
     elif not capacitorInput=="":
         capacitors=parseInput(capacitorInput)
@@ -74,26 +74,14 @@ while True:
     if not pattern.match(inductorInput) and not inductorInput=="":
         sg.popup("Invalid inductors")
         continue
-    elif inductorInput == "":
+    elif inductorInput == "NA":
         inductors = []
-    elif not inductorInput=="":
+    elif not capacitorInput=="":
         inductors=parseInput(inductorInput)
 
-    if not outputs:
-        sg.popup("Invalid output name(s)")
+    if not is_number(value):
+        sg.popup("Invalid output value")
         continue
-    else:
-        outputs = parseInput(outputs)
-
-    if not output_values:
-        sg.popup("Invalid output value(s)")
-        continue
-    else:
-        output_values = parseInput(output_values)
-        for output in output_values:
-            if not is_number(output):
-                sg.popup("Invalid output value(s)")
-                continue
 
     if not is_number(gen):
         sg.popup("Invalid generation")
@@ -106,4 +94,4 @@ while True:
     if not Path(ascPath).is_file() or not Path(ascPath).suffix==".asc":
         sg.popup("Invalid path")
     else:
-        ourLib.ga_sim(ascPath,resistors,capacitors,inductors,outputs,output_values,gen,solNum)
+        ourLib.ga_sim(ascPath,resistors,capacitors,inductors,output,value,gen,solNum)

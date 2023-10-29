@@ -60,7 +60,6 @@ logger.setLevel(logging.CRITICAL+1)
 #outputName="rms_vout"
 #desired_output = 7
 
-import time
 # Define Circuit Simulation and Fitness Evaluation
 def simulate_circuit(solution):
     filename=str(threading.get_ident())
@@ -70,11 +69,11 @@ def simulate_circuit(solution):
     net=lt.SpiceEditor(filename + '.net')
 
     solution = list(solution)
-    for r in resistorList:
+    for i,r in enumerate(resistorList):
         net.set_component_value(r, solution.pop(0))
-    for c in capacitorList:
+    for i,c in enumerate(capacitorList):
         net.set_component_value(c, solution.pop(0))
-    for l in inductorList:
+    for i,l in enumerate(inductorList):
         net.set_component_value(l, solution.pop(0))
 
     sim.run_now(net,run_filename=filename)
@@ -86,19 +85,12 @@ def simulate_circuit(solution):
     sim.file_cleanup()
     os.remove(filename + '.net')
 
-    temp = []
-    for name in outputNames:
-        temp.append(data[name][0])
-    return temp
+    return data[outputName][0]
 
 
 def fitness_function(ga_instance, solution, solution_idx):
-    temp = 0
-    outputs = simulate_circuit(solution)
-    for i,output in enumerate(outputs):
-        print(output)
-        temp += np.abs(output - float(desired_outputs[i]))
-    fitness = 1.0 / temp
+    output = simulate_circuit(solution)
+    fitness = 1.0 / np.abs(output - desired_output)
     return fitness
 
 def gene_space(num_R, num_C, num_L):
@@ -112,11 +104,11 @@ def print_values(solution):
     C = []
     L = []
     # flag - change based on given component names
-    for r in resistorList:
+    for i,r in enumerate(resistorList):
         R.append(f"{r} = {solution.pop(0)}")
-    for c in capacitorList:
+    for i,c in enumerate(capacitorList):
         C.append(f"{c} = {solution.pop(0)}")
-    for l in inductorList:
+    for i,l in enumerate(inductorList):
         L.append(f"{l} = {solution.pop(0)}")
     temp = {}
     if R:
@@ -129,28 +121,19 @@ def print_values(solution):
                 headers='keys', 
                 tablefmt='fancy_grid'))
 
-def print_outputs(prediction):
-    prediction = list(prediction)
-    outputs = {}
-    for i,output in enumerate(prediction):
-        outputs[outputNames[i]] = [f"{outputNames[i]} = {output}"]
-    print("Predicted output based on the best solution :")
-    print(tabulate(outputs,
-                   tablefmt='fancy_grid'))
-
 def ga_sim(ascPathRaw,resistorListArg,capacitorListArg,inductorListArg,outputNameArg,desired_outputArg,genNum,solNum):
     global ascPath
     global resistorList
     global capacitorList
     global inductorList
-    global outputNames
-    global desired_outputs
+    global outputName
+    global desired_output
     resistorList=resistorListArg
     capacitorList = capacitorListArg
     inductorList = inductorListArg
 
-    outputNames=outputNameArg
-    desired_outputs=desired_outputArg
+    outputName=outputNameArg
+    desired_output=float(desired_outputArg)
 
     ascPath=Path(ascPathRaw)
     workDir=ascPath.parent.absolute()
@@ -178,8 +161,6 @@ def ga_sim(ascPathRaw,resistorListArg,capacitorListArg,inductorListArg,outputNam
     mutation_type = "random"
     mutation_percent_genes = 10
 
-    gene_space_ = gene_space(len(resistorList),len(capacitorList),len(inductorList))
-
     ga_instance = pygad.GA(num_generations=num_generations,
                            num_parents_mating=num_parents_mating,
                            fitness_func=fitness_function,
@@ -191,18 +172,15 @@ def ga_sim(ascPathRaw,resistorListArg,capacitorListArg,inductorListArg,outputNam
                            keep_parents=keep_parents,
                            crossover_type=crossover_type,
                            mutation_type=mutation_type,
-                           gene_space=gene_space_,
-                           mutation_percent_genes=mutation_percent_genes,
-                           parallel_processing=["thread",min(num_parents_mating,8)])
+                           gene_space = gene_space(len(resistorList),len(capacitorList),len(inductorList)),
+                           mutation_percent_genes=mutation_percent_genes,parallel_processing=["thread",min(num_parents_mating,8)])
 
     ga_instance.run()
     LTC.file_cleanup()
 
     solution, solution_fitness, solution_idx = ga_instance.best_solution()
-    print(solution,solution_fitness,sep=' ')
     prediction = simulate_circuit(solution)
     # print("Parameters of the best solution : {solution}".format(solution=solution))
     print("Fitness value of the best solution = {solution_fitness}".format(solution_fitness=solution_fitness))
-    print_outputs(prediction)
+    print("Predicted output based on the best solution : {prediction}".format(prediction=prediction))
     print_values(solution)
-    ga_instance.plot_fitness()

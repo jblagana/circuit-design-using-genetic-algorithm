@@ -1,4 +1,4 @@
-* C:\Users\janrh\OneDrive - University of the Philippines\Acads\3RD YEAR (22-23)\2ND SEM\CoE 197\Mini project\Final\circuits\vdivider.asc
+* C:\Users\janrh\OneDrive - University of the Philippines\Acads\3RD YEAR (22-23)\2ND SEM\CoE 197\Mini project\Final\circuit design using genetic algorithm\circuits\vdivider.asc
 V1 N001 0 10
 R1 N001 vout 1k
 R2 vout 0 2k
