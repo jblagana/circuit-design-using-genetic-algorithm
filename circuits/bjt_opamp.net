@@ -1,0 +1,32 @@
+* C:\Users\janrh\OneDrive - University of the Philippines\Acads\3RD YEAR (22-23)\2ND SEM\CoE 197\Mini project\Final\circuits\bjt_opamp.asc
+Q1 N005 VIN N009 0 NPN
+Q2 N006 0 N009 0 NPN
+R1 VCC N005 13Meg
+R2 VCC N006 82
+R3 N009 VEE 13k
+R4 VCC N003 1.3
+R5 N007 VEE 120
+R6 VCC N002 120k
+R7 N002 VEE 9.1k
+R8 VCC N001 130
+RLOAD out 0 100
+Q3 N007 N005 N003 0 PNP
+Q4 N004 N002 N001 0 PNP
+Q5 VEE N007 N010 0 PNP
+Q6 VCC N004 out 0 NPN
+D1 N004 N008 D
+D2 N008 N010 D
+Q7 VEE N010 out 0 PNP
+V1 VCC 0 12
+V2 0 VEE 12
+VIN VIN 0 SINE(0 10m 100) AC 1
+.model D D
+.lib C:\Users\janrh\AppData\Local\LTspice\lib\cmp\standard.dio
+.model NPN NPN
+.model PNP PNP
+.lib C:\Users\janrh\AppData\Local\LTspice\lib\cmp\standard.bjt
+.meas gain rms v(out)
+.tran 100m
+;ac dec 100 1 1Meg
+.backanno
+.end
